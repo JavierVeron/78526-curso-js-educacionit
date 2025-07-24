@@ -1,3 +1,4 @@
+// Variables Globales
 const turnosMedicos = [
   {
     id: 1,
@@ -140,27 +141,103 @@ const turnosMedicos = [
     especialidad: "Urología"
   }
 ];
+let modoEdicion = false;
+let idTurno = 0;
 
-const tablaTurnosMedicos = document.getElementById("tablaTurnosMedicos");
 
-// Iteración for..of, forEach o for tradicional
-for (const turno of turnosMedicos) {
-    const fila = document.createElement("tr");
-    
-    // Opción #1 creando un elemento html y rellenando con innerHTML
-    /* fila.innerHTML = `<td>${turno.id}</td>
-    <td>${turno.nombrePaciente}</td>
-    <td>${turno.fecha}</td>
-    <td>${turno.hora}</td>
-    <td>${turno.especialidad}</td>`; */
+// Funciones
+const renderizarTabla = () => {
+  const tablaTurnosMedicos = document.getElementById("tablaTurnosMedicos");
+  tablaTurnosMedicos.innerHTML = "";
 
-    // Opción #2 creado cada uno de los elementos html
-    for (const propiedad in turno) {
-        const celda = document.createElement("td");
-        celda.innerHTML = turno[propiedad];
-        fila.appendChild(celda);
-    }
+  // Iteración for..of, forEach o for tradicional
+  for (const turno of turnosMedicos) {
+      const fila = document.createElement("tr");
+      
+      // Opción #1 creando un elemento html y rellenando con innerHTML
+      /* fila.innerHTML = `<td>${turno.id}</td>
+      <td>${turno.nombrePaciente}</td>
+      <td>${turno.fecha}</td>
+      <td>${turno.hora}</td>
+      <td>${turno.especialidad}</td>`; */
 
-    // Agrego la fila al contenedor tbody
-    tablaTurnosMedicos.appendChild(fila);
+      // Opción #2 creado cada uno de los elementos html
+      for (const propiedad in turno) {
+          const celda = document.createElement("td");
+          celda.innerHTML = turno[propiedad];
+          fila.appendChild(celda);
+      }
+
+      const celda = document.createElement("td");
+      celda.className = "text-end";
+      const botonEditar = document.createElement("button");
+      botonEditar.className = "btn btn-warning btn-sm fw-bold mx-1";
+      botonEditar.innerHTML = "Editar";
+      botonEditar.onclick = () => {
+        editarTurno(turno.id);
+      }
+      celda.appendChild(botonEditar);
+      const botonEliminar = document.createElement("button");
+      botonEliminar.className = "btn btn-danger btn-sm fw-bold mx-1";
+      botonEliminar.innerHTML = "Eliminar";
+      botonEliminar.onclick = () => {
+        eliminarTurno(turno.id);
+      }
+      celda.appendChild(botonEliminar);
+      fila.appendChild(celda);
+
+      // Agrego la fila al contenedor tbody
+      tablaTurnosMedicos.appendChild(fila);
+  }
 }
+
+const agregarTurno = (event) => {
+  event.preventDefault();
+  const form = document.getElementById("formAgregarTurno");
+  const nombre = document.getElementById("nombre").value;
+  const fecha = document.getElementById("fecha").value;
+  const hora = document.getElementById("hora").value;
+  const especialidad = document.getElementById("especialidad").value;
+
+  if (modoEdicion) {
+    modoEdicion = false;
+    const turno = turnosMedicos.find(item => item.id == idTurno);
+    turno.nombrePaciente = nombre;
+    turno.fecha = fecha;
+    turno.hora = hora;
+    turno.especialidad = especialidad;
+    console.log("Se editó el Turno #" + idTurno + "!");
+  } else {
+    const id = turnosMedicos.length + 1;
+    const turno = {id, nombre, fecha, hora, especialidad};
+    turnosMedicos.push(turno);
+    console.log("Se agregó el Turno #" + id + "!");
+  }
+
+  form.reset();
+  renderizarTabla();
+}
+
+const editarTurno = (id) => {
+  modoEdicion = true;
+  idTurno = id;
+  const turno = turnosMedicos.find(item => item.id == id);
+  document.getElementById("nombre").value = turno.nombrePaciente;
+  document.getElementById("fecha").value = turno.fecha;
+  document.getElementById("hora").value = turno.hora;
+  document.getElementById("especialidad").value = turno.especialidad;
+}
+
+const eliminarTurno = (id) => {  
+  const confirmar = confirm("Desea eliminar el Turno #" + id + "?");
+
+  if (confirmar) {
+    const pos = turnosMedicos.findIndex(item => item.id == id);    
+    turnosMedicos.splice(pos, 1);
+    renderizarTabla();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderizarTabla();
+})
